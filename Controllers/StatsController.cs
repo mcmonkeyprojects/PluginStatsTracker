@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using FreneticUtilities.FreneticDataSyntax;
@@ -30,10 +31,14 @@ namespace PluginStatsTracker.Controllers
             {
                 return StatusCode(400, "Unknown plugin id\n");
             }
-            string ip = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+            string ip = FixIP(Request.HttpContext.Connection.RemoteIpAddress.ToString());
             if (StatsServer.TrustXForwardedFor && Request.Headers.TryGetValue("X-Forwarded-For", out StringValues forwardHeader))
             {
-                ip += "/X-Forwarded-For: " + string.Join(" / ", forwardHeader);
+                string[] forwards = [.. forwardHeader.Select(FixIP).SelectMany(f => f.Split(',')).Select(f => f.Trim()).Where(f => !CheckExclusion(StatsServer.ExcludeForwardAddresses, f))];
+                if (forwards.Length > 0)
+                {
+                    ip += "/X-Forwarded-For: " + string.Join(" / ", forwardHeader);
+                }
             }
             StatSubmission submission = new()
             {
@@ -58,6 +63,82 @@ namespace PluginStatsTracker.Controllers
             }
             plugin.Current.Submit(submission);
             return Ok("Submitted\n");
+        }
+
+        public static HashSet<string> IgnoredOrigins = ["127.0.0.1", "::1", "[::1]"];
+
+        [NonAction]
+        public string FixIP(string ip)
+        {
+            if (ip.StartsWith("::ffff:"))
+            {
+                return ip["::ffff:".Length..];
+            }
+            // Trim v6 to the first half block
+            if (ip.Contains(':'))
+            {
+                string[] bits = ip.Split(':');
+                if (bits.Length == 8)
+                {
+                    return $"{bits[0]}:{bits[1]}:{bits[2]}:{bits[3]}::0";
+                }
+            }
+            return ip;
+        }
+
+
+        [NonAction]
+        public static bool CheckExclusion(string[] set, string realIp)
+        {
+            try
+            {
+                foreach (string compare in set)
+                {
+                    if (CheckContains(realIp, compare))
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error checking IP exclusion for `{realIp}`: {ex}");
+            }
+            return false;
+        }
+
+        [NonAction]
+        public static bool CheckContains(string realIp, string compare)
+        {
+            if (compare.Contains('/') && !realIp.Contains(':'))
+            {
+                return IsIpInRange(realIp, compare);
+            }
+            return realIp == compare;
+        }
+
+        [NonAction]
+        public static bool IsIpInRange(string ipAddress, string cidrRange)
+        {
+            string[] parts = cidrRange.Split('/');
+            string rangeIp = parts[0];
+            int prefixLength = int.Parse(parts[1]);
+            uint ipInt = IpToUInt(ipAddress);
+            uint rangeIpInt = IpToUInt(rangeIp);
+            uint mask = 0xFFFFFFFF << (32 - prefixLength);
+            return (ipInt & mask) == (rangeIpInt & mask);
+        }
+
+        [NonAction]
+        public static uint IpToUInt(string ipAddress)
+        {
+            IPAddress ip = IPAddress.Parse(ipAddress);
+            byte[] bytes = ip.GetAddressBytes();
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(bytes);
+            }
+            return BitConverter.ToUInt32(bytes, 0);
         }
     }
 }

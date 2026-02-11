@@ -18,7 +18,11 @@ namespace PluginStatsTracker.Stats
 
         public static string URLBase;
 
+        /// <summary>Whether X-Forwarded-For headers are trustworthy.</summary>
         public static bool TrustXForwardedFor;
+
+        /// <summary>Forward addresses to exclude when trusting X-Forwarded-For headers.</summary>
+        public static string[] ExcludeForwardAddresses;
 
         public static Dictionary<string, TrackedPlugin> TrackedPlugins = [];
 
@@ -34,6 +38,7 @@ namespace PluginStatsTracker.Stats
             Config = FDSUtility.ReadFile("./config/config.fds");
             URLBase = Config.GetString("url-base");
             TrustXForwardedFor = Config.GetBool("trust-x-forwarded-for", false).Value;
+            ExcludeForwardAddresses = [.. (Config.GetStringList("exclude-forward-addresses") ?? [])];
             FDSSection pluginSection = Config.GetSection("plugins");
             foreach (string pluginId in pluginSection.GetRootKeys())
             {
