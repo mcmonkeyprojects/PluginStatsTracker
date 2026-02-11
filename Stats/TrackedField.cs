@@ -33,7 +33,7 @@ namespace PluginStatsTracker.Stats
             Type = Enum.Parse<TrackedFieldType>(section.GetString("type"), true);
             Display = section.GetString("display");
             Any = section.GetBool("any", false).Value;
-            Values = section.GetString("values", "").SplitFast(',').Select(s => s.Replace(" ", "")).Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => TrackedFieldValue.Parse(s)).ToList();
+            Values = [.. section.GetString("values", "").SplitFast(',').Select(s => s.Replace(" ", "")).Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => TrackedFieldValue.Parse(s))];
             Length = section.GetInt("length", 32).Value;
             TimeGraphMonth = section.GetBool("time_graph.month", false).Value;
             TimeGraphLong = section.GetBool("time_graph.long", false).Value;
@@ -42,7 +42,7 @@ namespace PluginStatsTracker.Stats
 
         public StatReport.StatReportField Report(StatSubmission[] stats)
         {
-            Dictionary<string, int> counters = new();
+            Dictionary<string, int> counters = [];
             void bump(string name)
             {
                 if (counters.TryGetValue(name, out int count))
@@ -87,7 +87,7 @@ namespace PluginStatsTracker.Stats
             return new()
             {
                 FieldID = ID,
-                Values = counters.Select(pair => new StatReport.StatReportFieldValue() { Value = pair.Key, Count = pair.Value }).OrderByDescending(v => v.Count).ToArray(),
+                Values = [.. counters.Select(pair => new StatReport.StatReportFieldValue() { Value = pair.Key, Count = pair.Value }).OrderByDescending(v => v.Count)],
                 Total = total,
                 Counted = counted,
                 Average = (counted == 0) ? 0 : (float)(average / counted)

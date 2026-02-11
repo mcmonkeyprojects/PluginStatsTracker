@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DenizenPastingWebsite.Controllers
+namespace PluginStatsTracker.Controllers
 {
     public class ErrorController : Controller
     {

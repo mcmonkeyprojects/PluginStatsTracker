@@ -11,7 +11,7 @@ namespace PluginStatsTracker.Stats
 
         public DateTimeOffset TimeSubmitted;
 
-        public Dictionary<string, SubmittedValue> Values = new();
+        public Dictionary<string, SubmittedValue> Values = [];
 
         public struct SubmittedValue
         {

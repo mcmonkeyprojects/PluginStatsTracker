@@ -13,13 +13,13 @@ Current project status: functional but incomplete. Some features not needed for 
 
 Designed for and tested on a Debian Linux server.
 
-Usage on other Linux distros is likely very similar. Usage outside Linux may require independent research regarding how to install DotNet 6, and how to run a generic executable service perpetually.
+Usage on other Linux distros is likely very similar. Usage outside Linux may require independent research regarding how to install DotNet 8, and how to run a generic executable service perpetually.
 
-- Make sure you have `screen` and `dotnet-6-sdk` available
+- Make sure you have `dotnet-8-sdk` available
 - Add a user for the service (via `adduser` generally, then `su` to that user)
 - Clone the git repo (`git clone https://github.com/mcmonkeyprojects/PluginStatsTracker`) and enter the folder
 - Make a folder labeled `config`, inside it make a text file labeled `config.fds`, and fill it with the config sample below (and change values to fit your configuration needs).
-- Call `./update.sh`
+- `git pull`
 - Will by default open on port 8131. To change this, edit `start.sh`
 - It is strongly recommended you run this webserver behind a reverse proxy like Apache2 or Nginx.
 
@@ -100,7 +100,7 @@ You can do basically whatever you want, except you may not hold any developer li
 
 The MIT License (MIT)
 
-Copyright (c) 2022 Alex 'mcmonkey' Goodwin
+Copyright (c) 2022-2026 Alex 'mcmonkey' Goodwin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

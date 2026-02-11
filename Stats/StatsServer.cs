@@ -20,7 +20,7 @@ namespace PluginStatsTracker.Stats
 
         public static bool TrustXForwardedFor;
 
-        public static Dictionary<string, TrackedPlugin> TrackedPlugins = new();
+        public static Dictionary<string, TrackedPlugin> TrackedPlugins = [];
 
         public static CancellationTokenSource CancelToken = new();
 

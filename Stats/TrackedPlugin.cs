@@ -25,7 +25,7 @@ namespace PluginStatsTracker.Stats
 
         public string InfoLink;
 
-        public Dictionary<string, TrackedField> Fields = new();
+        public Dictionary<string, TrackedField> Fields = [];
 
         public CurrentPluginStats Current;
 
@@ -77,14 +77,14 @@ namespace PluginStatsTracker.Stats
                     return result;
                 }
             }
-            return new StatReport() { ForPluginID = ID, Fields = Array.Empty<StatReport.StatReportField>() };
+            return new StatReport() { ForPluginID = ID, Fields = [] };
         }
 
         public LockObject PageGenLock = new();
 
         public List<StatReport> BuildReportList(DateTimeOffset now, TimeSpan jump, int count)
         {
-            List<StatReport> reports = new();
+            List<StatReport> reports = [];
             for (int i = count; i >= 0; i--)
             {
                 int id = StatsServer.DateToTimeID(now.Subtract(jump * i));
@@ -196,8 +196,8 @@ namespace PluginStatsTracker.Stats
 
         public void BuildTimeGraph(StatReport report, string id, StatReport.StatReportField currentField, TrackedField tracked, List<StatReport> history, StringBuilder js, StringBuilder graphs)
         {
-            HashSet<string> valueSet = new(), excludeSet = new();
-            List<(StatReport, StatReport.StatReportField)> fieldHistory = history.Select(r => (r, r.Fields.FirstOrDefault(f => f.FieldID == tracked.ID))).Where(f => f.Item2 is not null).ToList();
+            HashSet<string> valueSet = [], excludeSet = [];
+            List<(StatReport, StatReport.StatReportField)> fieldHistory = [.. history.Select(r => (r, r.Fields.FirstOrDefault(f => f.FieldID == tracked.ID))).Where(f => f.Item2 is not null)];
             foreach ((StatReport _, StatReport.StatReportField field) in fieldHistory)
             {
                 foreach (StatReport.StatReportFieldValue subValue in field.Values)
@@ -215,7 +215,7 @@ namespace PluginStatsTracker.Stats
                 }
             }
             js.Append($"var data_{tracked.ID}_{id} = google.visualization.arrayToDataTable([\n['Time'");
-            string[] values = valueSet.OrderByDescending(val => currentField.Values.FirstOrDefault(sv => sv.Value == val)?.Count ?? 0).ToArray();
+            string[] values = [.. valueSet.OrderByDescending(val => currentField.Values.FirstOrDefault(sv => sv.Value == val)?.Count ?? 0)];
             foreach (string key in values)
             {
                 js.Append($",'{HtmlJsClean(key)}'");

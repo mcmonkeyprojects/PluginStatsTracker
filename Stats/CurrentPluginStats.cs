@@ -38,13 +38,13 @@ namespace PluginStatsTracker.Stats
 
         public StatReport Report()
         {
-            StatSubmission[] submissions = Submissions.Values.ToArray();
+            StatSubmission[] submissions = [.. Submissions.Values];
             return new()
             {
                 StatID = StatsServer.GetCurrentTimeID(),
                 ForPluginID = ForPlugin.ID,
                 Total = submissions.Length,
-                Fields = ForPlugin.Fields.Values.Select(f => f.Report(submissions)).ToArray()
+                Fields = [.. ForPlugin.Fields.Values.Select(f => f.Report(submissions))]
             };
         }
     }
