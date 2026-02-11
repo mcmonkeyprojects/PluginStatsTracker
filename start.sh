@@ -1,3 +1,5 @@
 #!/bin/bash
 dotnet restore
-ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_URLS=http://*:8131 dotnet run
+export ASPNETCORE_ENVIRONMENT=Production
+export ASPNETCORE_URLS=http://*:8131
+dotnet run
